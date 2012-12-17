@@ -2,7 +2,6 @@ package com.CmdConsole;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -13,12 +12,12 @@ import com.CmdConsole.ZkSrvHandler;
 import com.ZkServer.ZkServerManager;
 
 public class MultyConsole extends Thread{
-	private HashMap<String, IHandlerCommands> commands = new HashMap<String, IHandlerCommands>();
+	private HashMap<String, IHandlerCommands> listCommands = new HashMap<String, IHandlerCommands>();
 	
 	@PostConstruct
 	public void postConstruct() throws IOException {
 
-		final ConsoleReader reader = new ConsoleReader(System.in, System.out);
+		final ConsoleReader reader = new ConsoleReader();
 		
 		ZkServerManager zk = null;
 		try {
@@ -27,17 +26,13 @@ public class MultyConsole extends Thread{
 			e1.printStackTrace();
 		}
 		registerCommand("zksrv", new ZkSrvHandler(zk));
-		//commands.put("zksrv", new ZkSrvHandler(zk));
 		
 		reader.setPrompt("smilart> ");
-//		reader.setDefaultPrompt("smilart> ");
 		reader.setHistoryEnabled(true);
-//		reader.setUseHistory(true);
 		
-		RunCommands rc = new RunCommands(reader, commands);
+		RunCommands rc = new RunCommands(reader, listCommands);
 		Thread thread = new Thread(rc, "Console");
-		//thread.setDaemon(true);
-//		thread.start();
+
 		thread.run();
 		try {
 			thread.join();
@@ -45,8 +40,9 @@ public class MultyConsole extends Thread{
 			e.printStackTrace();
 		}
 	}
+	
 	public void registerCommand(String command, IHandlerCommands handler) {
-		commands.put(command, handler);
+		listCommands.put(command, handler);
 	}
 	
 	public static void main(String [] args){
@@ -56,8 +52,5 @@ public class MultyConsole extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		};
-//		while (true) {
-//			
-//		}
 	}
 }

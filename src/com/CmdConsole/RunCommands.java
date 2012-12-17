@@ -19,7 +19,6 @@ public class RunCommands implements Runnable {
 	
 	public RunCommands (ConsoleReader reader, HashMap<String, IHandlerCommands> listCommnds){
 		this.reader = reader;
-		System.out.println("this.reader = " + reader);
 		this.listCommands = listCommnds;
 	}
 	
@@ -27,10 +26,7 @@ public class RunCommands implements Runnable {
 		String line;
 
 		try {
-			System.out.println("reader = " + reader);
-			line = reader.readLine();
-			System.out.println("Read line:::" + line);
-			while (line != null) {
+			while ((line = reader.readLine()) != null) {
 				if (line.length() == 0 || line.trim().equals("quit")){
 					break;
 				}
@@ -42,8 +38,6 @@ public class RunCommands implements Runnable {
 					IHandlerCommands handler = listCommands.get(command);
 					if (handler != null) {
 //						StringWriter sw = new StringWriter();
-//						JCommander jc = new JCommander();
-
 						try {
 							handler.call(Arrays.copyOfRange(parts, 1, parts.length));
 						} catch (Exception ex) {
@@ -53,7 +47,6 @@ public class RunCommands implements Runnable {
 //						reader.println(sw.toString());
 					} else {
 						reader.println("unknown command: " + command);
-//						reader.printString("unknown command: " + command);
 					}
 				}
 			}
