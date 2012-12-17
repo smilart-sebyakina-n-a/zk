@@ -3,8 +3,6 @@ package com.CmdConsole;
 import java.io.IOException;
 import java.util.HashMap;
 
-import javax.annotation.PostConstruct;
-
 import jline.console.ConsoleReader;
 
 import com.CmdConsole.IHandlerCommands;
@@ -14,8 +12,8 @@ import com.ZkServer.ZkServerManager;
 public class MultyConsole extends Thread{
 	private HashMap<String, IHandlerCommands> listCommands = new HashMap<String, IHandlerCommands>();
 	
-	@PostConstruct
-	public void postConstruct() throws IOException {
+
+	public void startConsole() throws IOException {
 
 		final ConsoleReader reader = new ConsoleReader();
 		
@@ -33,12 +31,7 @@ public class MultyConsole extends Thread{
 		RunCommands rc = new RunCommands(reader, listCommands);
 		Thread thread = new Thread(rc, "Console");
 
-		thread.run();
-		try {
-			thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		thread.start();
 	}
 	
 	public void registerCommand(String command, IHandlerCommands handler) {
@@ -46,9 +39,9 @@ public class MultyConsole extends Thread{
 	}
 	
 	public static void main(String [] args){
-		MultyConsole c = new MultyConsole();
 		try {
-			c.postConstruct();
+			MultyConsole c = new MultyConsole();
+			c.startConsole();
 		} catch (IOException e) {
 			e.printStackTrace();
 		};
