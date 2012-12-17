@@ -11,6 +11,7 @@ import com.ZkServer.ZkServerManager;
 
 public class MultyConsole extends Thread{
 	private HashMap<String, IHandlerCommands> listCommands = new HashMap<String, IHandlerCommands>();
+	private HashMap<String, String> declarationCommands = new HashMap<String, String>();
 	
 
 	public void startConsole() throws IOException {
@@ -23,8 +24,9 @@ public class MultyConsole extends Thread{
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		registerCommand("zksrv", new ZkSrvHandler(zk));
-		
+		registerCommand("zksrv", new ZkSrvHandler(zk), "Management zookeeper servers.");
+		registerCommand("help",  new HelpHandler(declarationCommands), "Output help.");
+				
 		reader.setPrompt("smilart> ");
 		reader.setHistoryEnabled(true);
 		
@@ -34,8 +36,9 @@ public class MultyConsole extends Thread{
 		thread.start();
 	}
 	
-	public void registerCommand(String command, IHandlerCommands handler) {
+	public void registerCommand(String command, IHandlerCommands handler, String declaration) {
 		listCommands.put(command, handler);
+		declarationCommands.put(command, declaration);
 	}
 	
 	public static void main(String [] args){
