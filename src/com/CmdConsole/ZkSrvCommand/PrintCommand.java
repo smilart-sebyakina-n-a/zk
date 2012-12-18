@@ -1,5 +1,7 @@
 package com.CmdConsole.ZkSrvCommand;
 
+import java.io.StringWriter;
+
 import com.CmdConsole.IHandlerCommands;
 import com.ZkServer.ZkServerManager;
 import com.beust.jcommander.Parameter;
@@ -18,9 +20,10 @@ public class PrintCommand implements IHandlerCommands {
 	}
 
 	@Override
-	public void call(String[] args) throws Exception {
+	public void call(String[] args, StringWriter sw) throws Exception {
         try {
-            zkServerManager.printZkSrv();
+            zkServerManager.printZkSrv(sw);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.CmdConsole.ZkSrvCommand;
 
+import java.io.StringWriter;
 import java.util.Collection;
 
 import com.CmdConsole.IHandlerCommands;
@@ -38,7 +39,7 @@ public class UpdateCommand implements IHandlerCommands {
 	}
 	
 	@Override
-	public void call(String[] args) throws Exception {
+	public void call(String[] args, StringWriter sw) throws Exception {
         
 		Collection<ZkSrvEnumerationEntry> list = null;
         try {

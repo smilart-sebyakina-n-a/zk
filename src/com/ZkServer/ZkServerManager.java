@@ -1,6 +1,9 @@
 package com.ZkServer;
 
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +29,8 @@ public class ZkServerManager implements IZkServerManager{
 	private static final String Path_to_Zk_srv = "/smilart/zk_srv";
 
 	private ZooKeeper zk;
+	
+	private StringWriter writer;
 	
 //	private ZkServerConfiguration zk_srv;
 	
@@ -67,8 +72,20 @@ public class ZkServerManager implements IZkServerManager{
 		// может еще что-то нужно будет сделать
 		zk.getChildren(Path_to_Zk_srv, watcher);
 	}
-	
-	public String zkSrvPath (String node){
+
+	 public void setWriter (StringWriter sw){
+		 this.writer = sw;
+	 }
+	 
+	 public boolean writerIsNull(){
+		 if (writer == null){
+			 return true;
+		 }else{
+			 return false;
+		 }
+	 }
+	 
+	private String zkSrvPath (String node){
 		return Path_to_Zk_srv + "/" + node;
 	}
 	
@@ -84,14 +101,39 @@ public class ZkServerManager implements IZkServerManager{
 		return list;
 	}
 	
+//	public void printZkSrv () throws Exception {
+//		for (String node : zk.getChildren(Path_to_Zk_srv, false)){
+//			System.out.print(node);
+//			Stat stat = new Stat();
+//			byte[] bytes = zk.getData(zkSrvPath(node), null, stat);
+//			System.out.println(new String(bytes));
+//		}
+//	}
+
 	public void printZkSrv () throws Exception {
-		for (String node : zk.getChildren(Path_to_Zk_srv, false)){
-			System.out.print(node);
-			Stat stat = new Stat();
-			byte[] bytes = zk.getData(zkSrvPath(node), null, stat);
-			System.out.println(new String(bytes));
+		StringWriter sw = new StringWriter();
+		printZkSrv(sw);
+//		System.out.println("writer = ");
+		if (writer == null) {
+			System.out.println(sw.toString());
+		}else{
+			writer = sw;
 		}
 	}
+
+	
+	public void printZkSrv (StringWriter output) throws Exception {
+		System.out.println(this.getClass().getName());
+		for (String node : zk.getChildren(Path_to_Zk_srv, false)){
+			//System.out.print(node);
+			output.write(node);
+			Stat stat = new Stat();
+			byte[] bytes = zk.getData(zkSrvPath(node), null, stat);
+			//System.out.println(new String(bytes));
+			output.write(new String(bytes) + "\n");
+		}
+	}
+
 	
 	/*public byte[] findByPath (String Path_to_node) throws Exception {
 		if (zk.exists(Path_to_node, false) != null){
@@ -157,16 +199,22 @@ public class ZkServerManager implements IZkServerManager{
 			ZkServerManager ZkServer = new ZkServerManager();
 			//ZkServer.findByPath("/smilart/zk_srv");
 
-			ZkServerConfiguration zkTest = new ZkServerConfiguration();
-			zkTest.pid = "6";
-			zkTest.ip =  "192.168.0.103";
-			zkTest.port_clients = "2181";
+//			ZkServerConfiguration zkTest = new ZkServerConfiguration();
+//			zkTest.pid = "6";
+//			zkTest.ip =  "192.168.0.103";
+//			zkTest.port_clients = "2181";
+			
+			StringWriter sw = new StringWriter();
+			ZkServer.printZkSrv(sw);
+			System.out.println(sw.toString());
+			sw.close();
+			
 			//ZkServer.addZkSrv(zkTest);
 			//ZkServer.removeZkSrv("4");
 			/*while(true){
                 
             }*/
-			ZkServer.printZkSrv();
+			//ZkServer.printZkSrv();
 			//ZkServer.close();
 		}catch (Exception e) {
 			e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.CmdConsole;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,10 +22,11 @@ public class ZkSrvHandler implements IHandlerCommands{
 		jc.addCommand(command, handler);
 	}
 	
-	public void call(String[] args) throws Exception {
+	public void call(String[] args, StringWriter sw) throws Exception {
 
 		jc = new JCommander();
 		
+		zkServerManager.setWriter(sw);
 		registerCommand("create", new CreateCommand(zkServerManager));
 		registerCommand("delete", new DeleteCommand(zkServerManager));
 		registerCommand("print",  new PrintCommand(zkServerManager));
@@ -42,7 +44,7 @@ public class ZkSrvHandler implements IHandlerCommands{
 			if (sb.indexOf("-help") != -1){
 				jc.usage(name);
 			} else {
-			listCommands.get(name).call(args);
+			listCommands.get(name).call(args, sw);
 			}
 		}
 		

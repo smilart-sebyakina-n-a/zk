@@ -1,6 +1,7 @@
 package com.CmdConsole;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -37,14 +38,14 @@ public class RunCommands implements Runnable {
 
 					IHandlerCommands handler = listCommands.get(command);
 					if (handler != null) {
-//						StringWriter sw = new StringWriter();
+						StringWriter sw = new StringWriter();
 						try {
-							handler.call(Arrays.copyOfRange(parts, 1, parts.length));
+							handler.call(Arrays.copyOfRange(parts, 1, parts.length), sw);
 						} catch (Exception ex) {
 							ex.printStackTrace();
 							reader.println("command error: " + ex.getMessage());
 						}
-//						reader.println(sw.toString());
+						reader.println(sw.toString());
 					} else {
 						reader.println("unknown command: " + command);
 					}

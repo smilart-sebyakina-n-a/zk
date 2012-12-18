@@ -1,5 +1,6 @@
 package com.CmdConsole;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,14 +13,12 @@ public class HelpHandler implements IHandlerCommands {
 		this.declarationCommands = declarationCommands;
 	}
 	
-	public void call(String[] args) throws Exception {
-		System.out.println("Basic commands:");
-		Set<Map.Entry<String, String>> set = declarationCommands.entrySet();
-		for (Map.Entry<String, String> me : set) {
-		      System.out.print(me.getKey() + ": ");
-		      System.out.println(me.getValue());
-		    }
-		System.out.println("А more detailed use: command help.");
+	public void call(String[] args, StringWriter sw) throws Exception {
+		sw.write("Basic commands:" + "\n");
+		for (String key : declarationCommands.keySet()) {
+			sw.write(key + ": " + declarationCommands.get(key) + "\n");
+		}
+		sw.write("А more detailed use: command help." + "\n");
 		
 	}
 

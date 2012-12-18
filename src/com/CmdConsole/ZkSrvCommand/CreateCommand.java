@@ -1,5 +1,7 @@
 package com.CmdConsole.ZkSrvCommand;
 
+import java.io.StringWriter;
+
 import com.CmdConsole.IHandlerCommands;
 import com.ZkServer.ZkServerConfiguration;
 import com.ZkServer.ZkServerManager;
@@ -29,7 +31,7 @@ public class CreateCommand implements IHandlerCommands{
 		this.zkServerManager = zkServerManager;
 	}
 	
-	public void call(String[] args) throws Exception {
+	public void call(String[] args, StringWriter sw) throws Exception {
 
 			ZkServerConfiguration ct = new ZkServerConfiguration();
 			ct.setIp(ip);
