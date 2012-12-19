@@ -26,6 +26,7 @@ public class DeleteCommand implements IHandlerCommands {
 	public void call(String[] args, StringWriter sw) throws Exception {
 
         try {
+        	zkServerManager.setWriter(sw);
             zkServerManager.removeZkSrv(pid);
         } catch (Exception e) {
                     e.printStackTrace();

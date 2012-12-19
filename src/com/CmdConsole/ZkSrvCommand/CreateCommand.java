@@ -39,6 +39,7 @@ public class CreateCommand implements IHandlerCommands{
 			ct.setActive(active);
 			ct.setPort_clients(port_clients);
 			try {
+				zkServerManager.setWriter(sw);
 				zkServerManager.addZkSrv(ct);
 			} catch (Exception e) {
 				e.printStackTrace();

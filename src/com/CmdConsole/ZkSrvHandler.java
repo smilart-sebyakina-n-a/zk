@@ -23,7 +23,7 @@ public class ZkSrvHandler implements IHandlerCommands{
 	}
 	
 	public void call(String[] args, StringWriter sw) throws Exception {
-
+		
 		jc = new JCommander();
 		
 		zkServerManager.setWriter(sw);
@@ -44,7 +44,9 @@ public class ZkSrvHandler implements IHandlerCommands{
 			if (sb.indexOf("-help") != -1){
 				jc.usage(name);
 			} else {
-			listCommands.get(name).call(args, sw);
+				listCommands.get(name).call(args, sw);
+				System.out.println("Обнаружил ZkSrvhandler в sw:");
+				System.out.println(sw.toString());
 			}
 		}
 		

@@ -22,7 +22,7 @@ public class PrintCommand implements IHandlerCommands {
 	@Override
 	public void call(String[] args, StringWriter sw) throws Exception {
         try {
-            zkServerManager.printZkSrv(sw);
+            zkServerManager.printZkSrv();
             
         } catch (Exception e) {
             e.printStackTrace();

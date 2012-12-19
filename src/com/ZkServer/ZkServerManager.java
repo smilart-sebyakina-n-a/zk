@@ -1,14 +1,9 @@
 package com.ZkServer;
 
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
@@ -30,7 +25,7 @@ public class ZkServerManager implements IZkServerManager{
 
 	private ZooKeeper zk;
 	
-	private StringWriter writer;
+	public StringWriter writer;
 	
 //	private ZkServerConfiguration zk_srv;
 	
@@ -38,11 +33,13 @@ public class ZkServerManager implements IZkServerManager{
 	
 	Watcher watcher = new Watcher() {
          @Override
-         public void process(WatchedEvent event) {
-                 System.out.println(event.getType());
+         final public void process(WatchedEvent event) {
                  if (event.getType() == EventType.NodeChildrenChanged || event.getType() == EventType.NodeDataChanged)
 					try {
+						System.out.println("printZkSrv -- getClass=" + zk.getClass());
 						printZkSrv();
+						System.out.println("Обнаружил watcher в writer:");
+						System.out.println(writer.toString());
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -71,6 +68,7 @@ public class ZkServerManager implements IZkServerManager{
 		}
 		// может еще что-то нужно будет сделать
 		zk.getChildren(Path_to_Zk_srv, watcher);
+		this.writer = null;
 	}
 
 	 public void setWriter (StringWriter sw){
@@ -80,10 +78,26 @@ public class ZkServerManager implements IZkServerManager{
 	 public boolean writerIsNull(){
 		 if (writer == null){
 			 return true;
-		 }else{
+		 } else {
 			 return false;
 		 }
 	 }
+	
+	private void println(String message) {
+		if (writerIsNull()) {
+			System.out.println(message);
+		} else {
+			writer.write(message + "\n");
+		}
+	}
+
+	private void print(String message) {
+		if (writerIsNull()) {
+			System.out.print(message);
+		} else {
+			writer.write(message);
+		}
+	}
 	 
 	private String zkSrvPath (String node){
 		return Path_to_Zk_srv + "/" + node;
@@ -101,51 +115,17 @@ public class ZkServerManager implements IZkServerManager{
 		return list;
 	}
 	
-//	public void printZkSrv () throws Exception {
-//		for (String node : zk.getChildren(Path_to_Zk_srv, false)){
-//			System.out.print(node);
-//			Stat stat = new Stat();
-//			byte[] bytes = zk.getData(zkSrvPath(node), null, stat);
-//			System.out.println(new String(bytes));
-//		}
-//	}
 
 	public void printZkSrv () throws Exception {
-		StringWriter sw = new StringWriter();
-		printZkSrv(sw);
-//		System.out.println("writer = ");
-		if (writer == null) {
-			System.out.println(sw.toString());
-		}else{
-			writer = sw;
-		}
-	}
-
-	
-	public void printZkSrv (StringWriter output) throws Exception {
-		System.out.println(this.getClass().getName());
+		System.out.println("printZkSrv -- getClass=" + zk.getClass());
 		for (String node : zk.getChildren(Path_to_Zk_srv, false)){
-			//System.out.print(node);
-			output.write(node);
+			print(node);
 			Stat stat = new Stat();
 			byte[] bytes = zk.getData(zkSrvPath(node), null, stat);
-			//System.out.println(new String(bytes));
-			output.write(new String(bytes) + "\n");
+			println(new String(bytes));
 		}
 	}
-
-	
-	/*public byte[] findByPath (String Path_to_node) throws Exception {
-		if (zk.exists(Path_to_node, false) != null){
-			//System.out.println("find");
-			Stat stat = new Stat();
-			byte[] bytes = zk.getData(Path_to_node, null, stat);
-			System.out.println(new String(bytes));
-			return bytes;
-		}
-		return null;
-	}*/
-	
+		
 	public ZkSrvEnumerationEntry findByPath (String node) throws Exception {
 		for (ZkSrvEnumerationEntry zkSrv : enumerate()) {
 			if (zkSrv.node.equals(node))
@@ -181,7 +161,6 @@ public class ZkServerManager implements IZkServerManager{
 	}
 	
 	public void updateZkSrv(String node, ZkServerConfiguration zkSrv, int version) throws Exception {
-//		if (findByPid(zkSrv.pid) == null && zk.exists(zkSrvPath(node), false) != null){
 		if (zk.exists(zkSrvPath(node), false) != null){
 			ZkSrvEnumerationEntry c = findByPath(node);
 			if ((!c.configuration.pid.equals(zkSrv.pid) && findByPid(zkSrv.pid) == null)  || c.configuration.pid.equals(zkSrv.pid)) {
@@ -205,7 +184,7 @@ public class ZkServerManager implements IZkServerManager{
 //			zkTest.port_clients = "2181";
 			
 			StringWriter sw = new StringWriter();
-			ZkServer.printZkSrv(sw);
+			ZkServer.printZkSrv();
 			System.out.println(sw.toString());
 			sw.close();
 			

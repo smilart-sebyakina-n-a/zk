@@ -45,6 +45,7 @@ public class RunCommands implements Runnable {
 							ex.printStackTrace();
 							reader.println("command error: " + ex.getMessage());
 						}
+						System.out.println("Обнаружил RunCommands в sw:");
 						reader.println(sw.toString());
 					} else {
 						reader.println("unknown command: " + command);

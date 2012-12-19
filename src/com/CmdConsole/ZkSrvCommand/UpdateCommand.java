@@ -56,7 +56,8 @@ public class UpdateCommand implements IHandlerCommands {
                         if (active != null) {ct.setActive(active);};
                         if (port_clients != null) {ct.setPort_clients(port_clients);};
                         try {
-                                zkServerManager.updateZkSrv(cnf.node, ct, cnf.version);
+                        	zkServerManager.setWriter(sw);    
+                        	zkServerManager.updateZkSrv(cnf.node, ct, cnf.version);
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
