@@ -3,6 +3,8 @@ package com.ZkServer;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import jline.console.ConsoleReader;
 
@@ -28,12 +30,13 @@ public class ZkServerManager implements IZkServerManager{
 
 	private ZooKeeper zk;
 	
-//	public StringWriter writer;
 	public ConsoleReader reader;
 	
 //	private ZkServerConfiguration zk_srv;
 	
 //	private ArrayList<ZkServerConfiguration> listZkSrv;
+	
+	private final Map<String, ZkSrvWatcher> entries = new HashMap<String, ZkSrvWatcher>();
 	
 	Watcher watcher = new Watcher() {
          @Override
