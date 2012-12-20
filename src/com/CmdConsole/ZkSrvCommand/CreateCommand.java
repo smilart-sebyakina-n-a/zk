@@ -1,15 +1,12 @@
 package com.CmdConsole.ZkSrvCommand;
 
-import java.io.StringWriter;
-
-import com.CmdConsole.IHandlerCommands;
 import com.ZkServer.ZkServerConfiguration;
 import com.ZkServer.ZkServerManager;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(commandNames = "create", commandDescription = "Create node for new zkserver.")
-public class CreateCommand implements IHandlerCommands{
+public class CreateCommand implements IZkSrvCommands{
 	@Parameter(names = "-pid", description = "pid for new zkserver (required)", arity = 1, required = true)
 	String pid;
 	
@@ -31,7 +28,7 @@ public class CreateCommand implements IHandlerCommands{
 		this.zkServerManager = zkServerManager;
 	}
 	
-	public void call(String[] args, StringWriter sw) throws Exception {
+	public void call(String[] args) throws Exception {
 
 			ZkServerConfiguration ct = new ZkServerConfiguration();
 			ct.setIp(ip);
@@ -39,7 +36,6 @@ public class CreateCommand implements IHandlerCommands{
 			ct.setActive(active);
 			ct.setPort_clients(port_clients);
 			try {
-				zkServerManager.setWriter(sw);
 				zkServerManager.addZkSrv(ct);
 			} catch (Exception e) {
 				e.printStackTrace();

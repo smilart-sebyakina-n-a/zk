@@ -1,8 +1,9 @@
 package com.CmdConsole;
 
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+
+import jline.console.ConsoleReader;
 
 import com.CmdConsole.ZkSrvCommand.*;
 import com.ZkServer.ZkServerManager;
@@ -11,22 +12,22 @@ import com.beust.jcommander.JCommander;
 public class ZkSrvHandler implements IHandlerCommands{
 	private ZkServerManager zkServerManager;
 	private JCommander jc;
-	private Map<String, IHandlerCommands> listCommands = new HashMap<String, IHandlerCommands>();
+	private Map<String, IZkSrvCommands> listCommands = new HashMap<String, IZkSrvCommands>();
 
 	public  ZkSrvHandler (ZkServerManager zkServerManager){
 		this.zkServerManager = zkServerManager;
 	}
 
-	private void registerCommand(String command, IHandlerCommands handler) {
+	private void registerCommand(String command, IZkSrvCommands handler) {
 		listCommands.put(command, handler);
 		jc.addCommand(command, handler);
 	}
 	
-	public void call(String[] args, StringWriter sw) throws Exception {
+	public void call(String[] args, ConsoleReader reader) throws Exception {
 		
 		jc = new JCommander();
 		
-		zkServerManager.setWriter(sw);
+		zkServerManager.setReader(reader);
 		registerCommand("create", new CreateCommand(zkServerManager));
 		registerCommand("delete", new DeleteCommand(zkServerManager));
 		registerCommand("print",  new PrintCommand(zkServerManager));
@@ -44,12 +45,10 @@ public class ZkSrvHandler implements IHandlerCommands{
 			if (sb.indexOf("-help") != -1){
 				jc.usage(name);
 			} else {
-				listCommands.get(name).call(args, sw);
-				System.out.println("Обнаружил ZkSrvhandler в sw:");
-				System.out.println(sw.toString());
+				listCommands.get(name).call(args);
 			}
 		}
-		
+//		zkServerManager.setReader(null);
 	}
 
 }

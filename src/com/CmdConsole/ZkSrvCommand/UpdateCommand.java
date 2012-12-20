@@ -1,9 +1,7 @@
 package com.CmdConsole.ZkSrvCommand;
 
-import java.io.StringWriter;
 import java.util.Collection;
 
-import com.CmdConsole.IHandlerCommands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.ZkServer.ZkServerManager;
@@ -12,7 +10,7 @@ import com.ZkServer.ZkServerConfiguration;
 import com.ZkServer.ZkSrvEnumerationEntry;
 
 @Parameters(commandNames = "update", commandDescription = "Update node for zkserver by name.")
-public class UpdateCommand implements IHandlerCommands {
+public class UpdateCommand implements IZkSrvCommands {
 
 	@Parameter(names = "-srv", description = "name zkserver (required)", arity = 1, required = true)
 	String srv;
@@ -39,7 +37,7 @@ public class UpdateCommand implements IHandlerCommands {
 	}
 	
 	@Override
-	public void call(String[] args, StringWriter sw) throws Exception {
+	public void call(String[] args) throws Exception {
         
 		Collection<ZkSrvEnumerationEntry> list = null;
         try {
@@ -56,7 +54,6 @@ public class UpdateCommand implements IHandlerCommands {
                         if (active != null) {ct.setActive(active);};
                         if (port_clients != null) {ct.setPort_clients(port_clients);};
                         try {
-                        	zkServerManager.setWriter(sw);    
                         	zkServerManager.updateZkSrv(cnf.node, ct, cnf.version);
                         } catch (Exception e) {
                                 e.printStackTrace();

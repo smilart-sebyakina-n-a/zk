@@ -1,14 +1,11 @@
 package com.CmdConsole.ZkSrvCommand;
 
-import java.io.StringWriter;
-
-import com.CmdConsole.IHandlerCommands;
 import com.ZkServer.ZkServerManager;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(commandNames = "print", commandDescription = "Print node for zkserver.")
-public class PrintCommand implements IHandlerCommands {
+public class PrintCommand implements IZkSrvCommands {
 	
 	@Parameter(names = "-help", description = "get help about print", help = true)
 	private boolean help;
@@ -20,7 +17,7 @@ public class PrintCommand implements IHandlerCommands {
 	}
 
 	@Override
-	public void call(String[] args, StringWriter sw) throws Exception {
+	public void call(String[] args) throws Exception {
         try {
             zkServerManager.printZkSrv();
             

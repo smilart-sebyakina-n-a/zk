@@ -1,7 +1,10 @@
 package com.ZkServer;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+
+import jline.console.ConsoleReader;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
@@ -25,7 +28,8 @@ public class ZkServerManager implements IZkServerManager{
 
 	private ZooKeeper zk;
 	
-	public StringWriter writer;
+//	public StringWriter writer;
+	public ConsoleReader reader;
 	
 //	private ZkServerConfiguration zk_srv;
 	
@@ -36,10 +40,7 @@ public class ZkServerManager implements IZkServerManager{
          final public void process(WatchedEvent event) {
                  if (event.getType() == EventType.NodeChildrenChanged || event.getType() == EventType.NodeDataChanged)
 					try {
-						System.out.println("printZkSrv -- getClass=" + zk.getClass());
-						printZkSrv();
-						System.out.println("Обнаружил watcher в writer:");
-						System.out.println(writer.toString());
+						infoAboutChanges();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -68,34 +69,35 @@ public class ZkServerManager implements IZkServerManager{
 		}
 		// может еще что-то нужно будет сделать
 		zk.getChildren(Path_to_Zk_srv, watcher);
-		this.writer = null;
+		this.reader = null;
 	}
 
-	 public void setWriter (StringWriter sw){
-		 this.writer = sw;
+	 public void setReader (ConsoleReader reader){
+		 this.reader = reader;
 	 }
 	 
-	 public boolean writerIsNull(){
-		 if (writer == null){
+	 public boolean readerIsNull(){
+		 if (reader == null){
 			 return true;
 		 } else {
 			 return false;
 		 }
 	 }
 	
-	private void println(String message) {
-		if (writerIsNull()) {
+	private void println(String message) throws IOException {
+		if (readerIsNull()) {
 			System.out.println(message);
 		} else {
-			writer.write(message + "\n");
+			reader.print(message);
+			reader.accept();
 		}
 	}
 
-	private void print(String message) {
-		if (writerIsNull()) {
+	private void print(String message) throws IOException {
+		if (readerIsNull()) {
 			System.out.print(message);
 		} else {
-			writer.write(message);
+			reader.print(message);
 		}
 	}
 	 
@@ -115,14 +117,21 @@ public class ZkServerManager implements IZkServerManager{
 		return list;
 	}
 	
-
 	public void printZkSrv () throws Exception {
-		System.out.println("printZkSrv -- getClass=" + zk.getClass());
 		for (String node : zk.getChildren(Path_to_Zk_srv, false)){
 			print(node);
 			Stat stat = new Stat();
 			byte[] bytes = zk.getData(zkSrvPath(node), null, stat);
 			println(new String(bytes));
+		}
+	}
+	
+	public void infoAboutChanges() throws Exception{
+		println("Zookeeper Watcher to  register changes in ".concat(Path_to_Zk_srv));
+		println("");
+		printZkSrv();
+		if (!readerIsNull()) {
+				println(reader.getPrompt());
 		}
 	}
 		

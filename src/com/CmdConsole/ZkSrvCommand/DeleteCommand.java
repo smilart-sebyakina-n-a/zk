@@ -1,14 +1,11 @@
 package com.CmdConsole.ZkSrvCommand;
 
-import java.io.StringWriter;
-
-import com.CmdConsole.IHandlerCommands;
 import com.ZkServer.ZkServerManager;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(commandNames = "delete", commandDescription = "Delete node with zkserver by pid.")
-public class DeleteCommand implements IHandlerCommands {
+public class DeleteCommand implements IZkSrvCommands {
 	
 	@Parameter(names = "-pid", description = "pid for deleted zkserver (required)", arity = 1, required = true)
 	String pid;
@@ -23,10 +20,9 @@ public class DeleteCommand implements IHandlerCommands {
 	}
 	
 	@Override
-	public void call(String[] args, StringWriter sw) throws Exception {
+	public void call(String[] args) throws Exception {
 
         try {
-        	zkServerManager.setWriter(sw);
             zkServerManager.removeZkSrv(pid);
         } catch (Exception e) {
                     e.printStackTrace();

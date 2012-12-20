@@ -1,13 +1,10 @@
 package com.CmdConsole.ZkSrvCommand;
 
-import java.io.StringWriter;
-
-import com.CmdConsole.IHandlerCommands;
 import com.ZkServer.ZkServerManager;
 import com.beust.jcommander.Parameters;
 
 @Parameters(commandNames = "help", commandDescription = "List commands for zksrv.")
-public class HelpCommand implements IHandlerCommands  {
+public class HelpCommand implements IZkSrvCommands  {
 	
 	private ZkServerManager zkServerManager;  
 	
@@ -15,7 +12,7 @@ public class HelpCommand implements IHandlerCommands  {
 		this.zkServerManager = zkServerManager;   
 	}
 	@Override
-	public void call(String[] args, StringWriter sw) throws Exception {
+	public void call(String[] args) throws Exception {
 		
 	}
 

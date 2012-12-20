@@ -1,9 +1,8 @@
 package com.CmdConsole;
 
-import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+
+import jline.console.ConsoleReader;
 
 public class HelpHandler implements IHandlerCommands {
 	
@@ -13,12 +12,12 @@ public class HelpHandler implements IHandlerCommands {
 		this.declarationCommands = declarationCommands;
 	}
 	
-	public void call(String[] args, StringWriter sw) throws Exception {
-		sw.write("Basic commands:" + "\n");
+	public void call(String[] args, ConsoleReader reader) throws Exception {
+		reader.println("Basic commands:");
 		for (String key : declarationCommands.keySet()) {
-			sw.write(key + ": " + declarationCommands.get(key) + "\n");
+			reader.println(key + ": " + declarationCommands.get(key));
 		}
-		sw.write("А more detailed use: command help." + "\n");
+		reader.println("А more detailed use: command help.");
 		
 	}
 

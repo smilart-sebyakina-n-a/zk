@@ -16,7 +16,7 @@ public class MultyConsole extends Thread{
 
 	public void startConsole() throws IOException {
 
-		final ConsoleReader reader = new ConsoleReader();
+		final ConsoleReader reader = new ConsoleReader(System.in, System.out);
 		
 		ZkServerManager zk = null;
 		try {
