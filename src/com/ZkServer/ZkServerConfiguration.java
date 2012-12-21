@@ -1,4 +1,6 @@
 package com.ZkServer;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class ZkServerConfiguration extends ValueObject {
@@ -19,6 +21,22 @@ public class ZkServerConfiguration extends ValueObject {
 
 	public static ZkServerConfiguration fromJson(byte[] bytes) {
 		return gson.fromJson(new String(bytes), ZkServerConfiguration.class);
+	}
+	
+	public static ArrayList<String> notEquals(ZkServerConfiguration a, ZkServerConfiguration b) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
+		ArrayList<String> diff = new ArrayList<String>();
+		for (Field field : a.getClass().getFields()){
+			Object aValue = field.get(a);
+			Object bValue = field.get(b);
+			if ( !aValue.equals(bValue)) {
+				diff.add(field.getName());
+			}
+		}
+		if (diff.size() != 0){
+			return diff;
+		} else{
+			return null;
+		}
 	}
 
 	public boolean isActive() {
@@ -52,5 +70,7 @@ public class ZkServerConfiguration extends ValueObject {
 	public String getPid() {
 		return pid;
 	}
+	
+	
 
 }

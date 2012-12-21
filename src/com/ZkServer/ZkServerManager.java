@@ -24,8 +24,8 @@ import ch.qos.logback.classic.Logger;
 public class ZkServerManager implements IZkServerManager{
 
 	private static final Logger log = (Logger) LoggerFactory.getLogger(ZkServerManager.class);
-	// в мс
-	private static final int TIMEOUT = 3000;
+	
+	private static final int TIMEOUT = 3000; //in ms
 	
 	private static final String Path_to_Zk_srv = "/smilart/zk_srv";
 
@@ -34,10 +34,12 @@ public class ZkServerManager implements IZkServerManager{
 	public static ConsoleReader reader;
 	
 //	private ZkServerConfiguration zk_srv;
-	
+//	
 //	private ArrayList<ZkServerConfiguration> listZkSrv;
 	
-	private Map<String, ZkSrvWatcher> entries = new HashMap<String, ZkSrvWatcher>();
+	private Map<String, ZkSrvWatcher> serverWatchers;
+	
+	private ArrayList<ZkSrvEnumerationEntry> listZkSrv; 
 	
 	Watcher watcher = new Watcher() {
          @Override
@@ -56,20 +58,21 @@ public class ZkServerManager implements IZkServerManager{
 				} 
          }
 	 };
-	 
+ 
 	 class ZkSrvWatcher implements Watcher{
 			private String node;
-//			private ZooKeeper zk;
 			public ZkSrvWatcher (String node){
 				this.node = node; 
-//				this.zk = zk;
 			}
 		    @Override
 			public void process(WatchedEvent event) {
 		    	if (event.getType() == EventType.NodeDataChanged) { 
 		    		try {
 						println(node + " was changed.");
+//						updateListZkSrv(node);
 					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -98,9 +101,18 @@ public class ZkServerManager implements IZkServerManager{
 		}
 		// может еще что-то нужно будет сделать
 		zk.getChildren(Path_to_Zk_srv, watcher);
-		this.entries = underСontrol();
+		this.serverWatchers = underСontrol();
 		this.reader = null;
+		this.listZkSrv = enumerate();
 	}
+	 private void updateListZkSrv(String node) throws Exception{
+		 ZkServerConfiguration inZoo = findByPath(node).configuration;
+		 for (ZkSrvEnumerationEntry zkSrv : listZkSrv) {
+			 if (zkSrv.node == node){
+				 
+			 }
+		 }
+	 }
 	 
 	 private Map<String, ZkSrvWatcher> underСontrol () throws KeeperException, InterruptedException{
 		 Map<String, ZkSrvWatcher> node_watcher = new HashMap<String, ZkSrvWatcher>();
