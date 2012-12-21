@@ -9,6 +9,7 @@ import java.util.Map;
 import jline.console.ConsoleReader;
 
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
@@ -36,7 +37,7 @@ public class ZkServerManager implements IZkServerManager{
 	
 //	private ArrayList<ZkServerConfiguration> listZkSrv;
 	
-	private final Map<String, ZkSrvWatcher> entries = new HashMap<String, ZkSrvWatcher>();
+	private Map<String, ZkSrvWatcher> entries = new HashMap<String, ZkSrvWatcher>();
 	
 	Watcher watcher = new Watcher() {
          @Override
@@ -49,8 +50,7 @@ public class ZkServerManager implements IZkServerManager{
 					}
                          //updateCameras(this);
                  try {
-                	 //printZkSrv(this);
-                	 zk.getChildren(Path_to_Zk_srv, watcher);
+                 	 zk.getChildren(Path_to_Zk_srv, watcher);
 				} catch (Exception e) {
 					e.printStackTrace();
 				} 
@@ -72,8 +72,19 @@ public class ZkServerManager implements IZkServerManager{
 		}
 		// может еще что-то нужно будет сделать
 		zk.getChildren(Path_to_Zk_srv, watcher);
+		this.entries = underСontrol();
 		this.reader = null;
 	}
+	 
+	 private Map<String, ZkSrvWatcher> underСontrol () throws KeeperException, InterruptedException{
+		 Map<String, ZkSrvWatcher> node_watcher = new HashMap<String, ZkSrvWatcher>();
+		 for (String node : zk.getChildren(Path_to_Zk_srv, false)){
+			 ZkSrvWatcher zkSrvWatcher = new ZkSrvWatcher(zk, node);
+			 node_watcher.put(node, zkSrvWatcher);
+			 zk.getData(zkSrvPath(node), zkSrvWatcher, null);
+		 }
+		 return  node_watcher;
+	 }
 
 	 public void setReader (ConsoleReader reader){
 		 this.reader = reader;
@@ -104,7 +115,7 @@ public class ZkServerManager implements IZkServerManager{
 		}
 	}
 	 
-	private String zkSrvPath (String node){
+	public static String zkSrvPath (String node){
 		return Path_to_Zk_srv + "/" + node;
 	}
 	
