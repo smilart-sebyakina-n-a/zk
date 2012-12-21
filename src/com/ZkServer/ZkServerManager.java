@@ -31,7 +31,7 @@ public class ZkServerManager implements IZkServerManager{
 
 	private ZooKeeper zk;
 	
-	public ConsoleReader reader;
+	public static ConsoleReader reader;
 	
 //	private ZkServerConfiguration zk_srv;
 	
@@ -56,6 +56,32 @@ public class ZkServerManager implements IZkServerManager{
 				} 
          }
 	 };
+	 
+	 class ZkSrvWatcher implements Watcher{
+			private String node;
+//			private ZooKeeper zk;
+			public ZkSrvWatcher (String node){
+				this.node = node; 
+//				this.zk = zk;
+			}
+		    @Override
+			public void process(WatchedEvent event) {
+		    	if (event.getType() == EventType.NodeDataChanged) { 
+		    		try {
+						println(node + " was changed.");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				try {
+					zk.getData(ZkServerManager.zkSrvPath(node), this, null);
+				} catch (KeeperException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 	 public ZkServerManager() throws Exception {
 		zk = new ZooKeeper("localhost:2181", TIMEOUT, null);
@@ -79,7 +105,7 @@ public class ZkServerManager implements IZkServerManager{
 	 private Map<String, ZkSrvWatcher> underСontrol () throws KeeperException, InterruptedException{
 		 Map<String, ZkSrvWatcher> node_watcher = new HashMap<String, ZkSrvWatcher>();
 		 for (String node : zk.getChildren(Path_to_Zk_srv, false)){
-			 ZkSrvWatcher zkSrvWatcher = new ZkSrvWatcher(zk, node);
+			 ZkSrvWatcher zkSrvWatcher = new ZkSrvWatcher(node);
 			 node_watcher.put(node, zkSrvWatcher);
 			 zk.getData(zkSrvPath(node), zkSrvWatcher, null);
 		 }
@@ -98,7 +124,7 @@ public class ZkServerManager implements IZkServerManager{
 		 }
 	 }
 	
-	private void println(String message) throws IOException {
+	public void println(String message) throws IOException {
 		if (readerIsNull()) {
 			System.out.println(message);
 		} else {
