@@ -2,7 +2,7 @@ package com.ZkServer;
 
 public class ZkSrvEnumerationEntry {
 	
-	public final ZkServerConfiguration configuration;
+	public ZkServerConfiguration configuration;
 
 	public final String node;
 		

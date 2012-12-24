@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import jline.console.ConsoleReader;
 
@@ -18,6 +20,10 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
+
+//import com.beust.jcommander.internal.Sets;
 
 import ch.qos.logback.classic.Logger;
 
@@ -33,10 +39,6 @@ public class ZkServerManager implements IZkServerManager{
 	
 	public static ConsoleReader reader;
 	
-//	private ZkServerConfiguration zk_srv;
-//	
-//	private ArrayList<ZkServerConfiguration> listZkSrv;
-	
 	private Map<String, ZkSrvWatcher> serverWatchers;
 	
 	private ArrayList<ZkSrvEnumerationEntry> listZkSrv; 
@@ -47,10 +49,10 @@ public class ZkServerManager implements IZkServerManager{
                  if (event.getType() == EventType.NodeChildrenChanged || event.getType() == EventType.NodeDataChanged)
 					try {
 						infoAboutChanges();
+						updateListZkSrv();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
-                         //updateCameras(this);
                  try {
                  	 zk.getChildren(Path_to_Zk_srv, watcher);
 				} catch (Exception e) {
@@ -69,7 +71,7 @@ public class ZkServerManager implements IZkServerManager{
 		    	if (event.getType() == EventType.NodeDataChanged) { 
 		    		try {
 						println(node + " was changed.");
-//						updateListZkSrv(node);
+						updateListZkSrv(node);
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (Exception e) {
@@ -108,10 +110,38 @@ public class ZkServerManager implements IZkServerManager{
 	 private void updateListZkSrv(String node) throws Exception{
 		 ZkServerConfiguration inZoo = findByPath(node).configuration;
 		 for (ZkSrvEnumerationEntry zkSrv : listZkSrv) {
-			 if (zkSrv.node == node){
-				 
+			 if (zkSrv.node.equals(node)){
+				 for (String field : zkSrv.configuration.notEquals(inZoo)) {
+					 println("Change " + field + " : " + zkSrv.configuration.getField(field) + " --> " + inZoo.getField(field));
+				 }
+				 zkSrv.configuration = inZoo;
 			 }
 		 }
+	 }
+	 
+	 private void updateListZkSrv() throws Exception{
+		 ArrayList<ZkSrvEnumerationEntry> ll = enumerate();
+		 Set <String> nodesInZoo = new HashSet<String>();
+		 for (ZkSrvEnumerationEntry z : ll){
+			 nodesInZoo.add(z.node);
+		 }
+		 Set <String> nodesUnderControl = serverWatchers.keySet();
+		 
+		 for (String node : Sets.difference(nodesInZoo, nodesUnderControl)){
+			 if (serverWatchers.get(node) == null){
+				 ZkSrvWatcher zkSrvWatcher = new ZkSrvWatcher(node);
+				 serverWatchers.put(node, zkSrvWatcher);
+				 byte[] bytes = zk.getData(zkSrvPath(node), zkSrvWatcher, null);
+				 String s = bytes.toString();
+				 println("Add zk-server " + node + s);
+			 } else {
+				 if (! nodesInZoo.contains(node)){
+					 serverWatchers.remove(node);
+					 println("Remove zk-server " + node);
+				 }
+			 }
+		 }
+		 listZkSrv = ll;
 	 }
 	 
 	 private Map<String, ZkSrvWatcher> underСontrol () throws KeeperException, InterruptedException{
@@ -216,6 +246,7 @@ public class ZkServerManager implements IZkServerManager{
 	
 	public void removeZkSrv(String pid) throws Exception {
 		ZkSrvEnumerationEntry ptr = findByPid(pid); 
+		serverWatchers.remove(ptr.node);
 		if (ptr != null){
 			zk.delete(zkSrvPath(ptr.node), ptr.version);
 		}

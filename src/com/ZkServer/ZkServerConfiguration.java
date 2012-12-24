@@ -38,6 +38,32 @@ public class ZkServerConfiguration extends ValueObject {
 			return null;
 		}
 	}
+	
+	public ArrayList<String> notEquals(ZkServerConfiguration b) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
+		ArrayList<String> diff = new ArrayList<String>();
+		for (Field field : this.getClass().getFields()){
+			Object aValue = field.get(this);
+			Object bValue = field.get(b);
+			if ( !aValue.equals(bValue)) {
+				diff.add(field.getName());
+			}
+		}
+		if (diff.size() != 0){
+			return diff;
+		} else{
+			return null;
+		}
+	}
+	
+	public String getField(String name) throws IllegalArgumentException, IllegalAccessException{
+		Object aValue = null;
+		for (Field field : this.getClass().getFields()){
+			if (field.getName() == name) {
+				aValue = field.get(this);
+			}
+		}
+		return aValue.toString();
+	}
 
 	public boolean isActive() {
 		return active;
