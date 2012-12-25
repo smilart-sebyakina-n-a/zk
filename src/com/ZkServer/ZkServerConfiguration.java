@@ -23,22 +23,6 @@ public class ZkServerConfiguration extends ValueObject {
 		return gson.fromJson(new String(bytes), ZkServerConfiguration.class);
 	}
 	
-	public static ArrayList<String> notEquals(ZkServerConfiguration a, ZkServerConfiguration b) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
-		ArrayList<String> diff = new ArrayList<String>();
-		for (Field field : a.getClass().getFields()){
-			Object aValue = field.get(a);
-			Object bValue = field.get(b);
-			if ( !aValue.equals(bValue)) {
-				diff.add(field.getName());
-			}
-		}
-		if (diff.size() != 0){
-			return diff;
-		} else{
-			return null;
-		}
-	}
-	
 	public ArrayList<String> notEquals(ZkServerConfiguration b) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException{
 		ArrayList<String> diff = new ArrayList<String>();
 		for (Field field : this.getClass().getFields()){

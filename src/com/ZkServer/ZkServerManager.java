@@ -3,6 +3,7 @@ package com.ZkServer;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,8 +23,6 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
-
-//import com.beust.jcommander.internal.Sets;
 
 import ch.qos.logback.classic.Logger;
 
@@ -46,10 +45,10 @@ public class ZkServerManager implements IZkServerManager{
 	Watcher watcher = new Watcher() {
          @Override
          final public void process(WatchedEvent event) {
-                 if (event.getType() == EventType.NodeChildrenChanged || event.getType() == EventType.NodeDataChanged)
+                 if (event.getType() == EventType.NodeChildrenChanged)
 					try {
-						infoAboutChanges();
 						updateListZkSrv();
+						infoAboutChanges();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -68,24 +67,17 @@ public class ZkServerManager implements IZkServerManager{
 			}
 		    @Override
 			public void process(WatchedEvent event) {
-		    	if (event.getType() == EventType.NodeDataChanged) { 
+		    	if (event.getType() == EventType.NodeDataChanged && event.getType() != EventType.NodeDeleted) { 
 		    		try {
-						println(node + " was changed.");
 						updateListZkSrv(node);
+						zk.getData(zkSrvPath(node), this, null);
 					} catch (IOException e) {
 						e.printStackTrace();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				try {
-					zk.getData(ZkServerManager.zkSrvPath(node), this, null);
-				} catch (KeeperException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+	    	}
 		}
 
 	 public ZkServerManager() throws Exception {
@@ -106,11 +98,13 @@ public class ZkServerManager implements IZkServerManager{
 		this.serverWatchers = underСontrol();
 		this.reader = null;
 		this.listZkSrv = enumerate();
+		
 	}
 	 private void updateListZkSrv(String node) throws Exception{
 		 ZkServerConfiguration inZoo = findByPath(node).configuration;
 		 for (ZkSrvEnumerationEntry zkSrv : listZkSrv) {
 			 if (zkSrv.node.equals(node)){
+				 println(node + " was changed.");
 				 for (String field : zkSrv.configuration.notEquals(inZoo)) {
 					 println("Change " + field + " : " + zkSrv.configuration.getField(field) + " --> " + inZoo.getField(field));
 				 }
@@ -119,27 +113,26 @@ public class ZkServerManager implements IZkServerManager{
 		 }
 	 }
 	 
-	 private void updateListZkSrv() throws Exception{
+	 private void updateListZkSrv() throws Exception {
 		 ArrayList<ZkSrvEnumerationEntry> ll = enumerate();
 		 Set <String> nodesInZoo = new HashSet<String>();
 		 for (ZkSrvEnumerationEntry z : ll){
 			 nodesInZoo.add(z.node);
 		 }
 		 Set <String> nodesUnderControl = serverWatchers.keySet();
+		 Object[] d = Sets.difference(nodesUnderControl, nodesInZoo).toArray();
+
+		 for (Object node1 : d) {
+			 serverWatchers.remove((String) node1);
+			 println("Remove zk-server " + node1 + " "); // + Arrays.toString(d));
+		 }
 		 
 		 for (String node : Sets.difference(nodesInZoo, nodesUnderControl)){
-			 if (serverWatchers.get(node) == null){
-				 ZkSrvWatcher zkSrvWatcher = new ZkSrvWatcher(node);
-				 serverWatchers.put(node, zkSrvWatcher);
-				 byte[] bytes = zk.getData(zkSrvPath(node), zkSrvWatcher, null);
-				 String s = bytes.toString();
-				 println("Add zk-server " + node + s);
-			 } else {
-				 if (! nodesInZoo.contains(node)){
-					 serverWatchers.remove(node);
-					 println("Remove zk-server " + node);
-				 }
-			 }
+			 ZkSrvWatcher zkSrvWatcher = new ZkSrvWatcher(node);
+			 serverWatchers.put(node, zkSrvWatcher);
+			 byte[] bytes = zk.getData(zkSrvPath(node), zkSrvWatcher, null);
+			 String ss = new String(bytes);	
+			 println("Add zk-server " + node + " " + ss);
 		 }
 		 listZkSrv = ll;
 	 }
@@ -210,7 +203,7 @@ public class ZkServerManager implements IZkServerManager{
 	
 	public void infoAboutChanges() throws Exception{
 		println("Zookeeper Watcher to  register changes in ".concat(Path_to_Zk_srv));
-		println("");
+		println("Now:");
 		printZkSrv();
 		if (!readerIsNull()) {
 				println(reader.getPrompt());
@@ -246,7 +239,6 @@ public class ZkServerManager implements IZkServerManager{
 	
 	public void removeZkSrv(String pid) throws Exception {
 		ZkSrvEnumerationEntry ptr = findByPid(pid); 
-		serverWatchers.remove(ptr.node);
 		if (ptr != null){
 			zk.delete(zkSrvPath(ptr.node), ptr.version);
 		}
